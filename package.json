@@ -1,0 +1,32 @@
+{
+    "name": "copy-screen-recursively",
+    "version": "v1.0.0",
+    "description": "Copy the screen folder to new screen with different screen names.",
+    "main": "bin/cli.js",
+    "bin": {
+        "copy-screen-recursively": "bin/cli.js"
+    },
+    "scripts": {
+        "start": "node ./src/index",
+        "test": "ode ./src/index screenDir=./"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/tongngochuunghia/copy-screen-recursively-private.git"
+    },
+    "author": "tongngochuunghia@gmail.com",
+    "license": "MIT",
+    "keywords": [
+        "copy",
+        "screen",
+        "recursively",
+        "copy-screen",
+        "copy-screen-recursively"
+    ],
+    "dependencies": {
+        "chalk": "^4.0.0",
+        "clear": "^0.1.0",
+        "figlet": "^1.4.0",
+        "fs-extra": "^9.0.0"
+    }
+}
