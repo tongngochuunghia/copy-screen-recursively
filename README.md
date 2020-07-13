@@ -4,7 +4,7 @@
  | (_| (_) | |_) | |_| |_____\__ \ (__| | |  __/  __/ | | |_____| | |  __/ (__| |_| | |  \__ \ |\ V /  __/ | |_| |
   \___\___/| .__/ \__, |     |___/\___|_|  \___|\___|_| |_|     |_|  \___|\___|\__,_|_|  |___/_| \_/ \___|_|\__, |
            |_|    |___/                                                                                     |___/ 
- Version v1.0.0 - tongngochuunghia@gmail.com 
+ Version v1.1.0 - tongngochuunghia@gmail.com 
 ```
 
 Welcome to the `copy-screen-recursively`!
@@ -29,7 +29,7 @@ root
 
 **Using `copy-screen-recursively`**
 ```bash
-$ copy-screen-recursively screenDir=./src/pages
+$ copy-screen-recursively --screenPath=./src/pages
 # What is the screen name you want to copy?
 # [SOURCE] Screen name: Login
 # What is the screen name you want to create?
@@ -74,10 +74,11 @@ yarn add https://github.com/tongngochuunghia/copy-screen-recursively.git
 Open `package.json` and add the following `scripts`:
 ```bash
 "scripts": {
-  "copy-screen": "copy-screen-recursively screenDir=./src/pages"
+  "copy-screen": "copy-screen-recursively --screenPath=./src/pages"
 }
 ```
-- `screenDir`: The folder contains screens, default `./src/pages`
+- `--screenPath`: The folder contains screens, default `./src/pages`
+- `--debug`: Enabled debug mode, default `false`
 
 ## Using
 ```bash

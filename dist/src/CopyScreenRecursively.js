@@ -18,10 +18,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var readline = __importStar(require("readline"));
 var fse = __importStar(require("fs-extra"));
 var path = __importStar(require("path"));
+var Logger_1 = __importDefault(require("./Logger"));
+var chalk_1 = __importDefault(require("chalk"));
 var CopyScreenRecursively = (function () {
     function CopyScreenRecursively(props) {
         var _this = this;
@@ -30,56 +35,49 @@ var CopyScreenRecursively = (function () {
         this.execute = function () {
             _this.requestSourceName(function (sourceName, sourcePath) {
                 _this.currentSourceName = sourceName;
-                console.log("");
                 _this.requestDestName(function (destName, destPath) {
                     _this.currentDestName = destName;
-                    console.log("");
+                    _this.logger.info("");
                     _this.copyFileRecursive(sourcePath, destPath, function () {
-                        console.log("\x1b[33m%s\x1b[0m", "\n\n\nNEW SCREEN COPY COMPLETED!!!");
+                        _this.logger.info(chalk_1.default.green("\nCompleted."));
                         process.exit();
                     });
                 });
             });
         };
         this.requestSourceName = function (callback) {
-            console.log("\nWhat is the screen name you want to copy?");
+            _this.logger.info(chalk_1.default.yellow("\nWhat is the screen name you want to copy?"));
             _this.rl.question("[SOURCE] Screen name: ", function (answer) {
                 if (_this.isNullOrEmpty(answer)) {
-                    console.log("Please enter the screen name.");
+                    _this.logger.info("Please enter the screen name.");
                     _this.requestSourceName(callback);
                     return;
                 }
                 var sourceName = ("" + answer).trim();
-                var sourcePath = path.join(_this.config.screenPath, sourceName);
-                if (_this.config.debug) {
-                    console.log(_this.className + "#requestSourceName: sourcePath=" + sourcePath);
-                }
-                console.log("Absolute path: " + path.resolve(sourcePath));
+                var sourcePath = path.join(_this.options.screenPath, sourceName);
+                _this.logger.debug("%s - [debug] %s#requestSourceName: sourcePath=%s", new Date().toISOString(), _this.className, chalk_1.default.gray(sourcePath));
                 if (fse.existsSync(sourcePath)) {
                     callback(sourceName, sourcePath);
                 }
                 else {
-                    console.log("The \"" + sourceName + "\" screen does not exist, please check and try again.");
+                    _this.logger.error(chalk_1.default.red("The \"" + sourceName + "\" screen does not exist, please check and try again."));
                     process.exit();
                 }
             });
         };
         this.requestDestName = function (callback) {
-            console.log("\nWhat is the screen name you want to create?");
+            _this.logger.info(chalk_1.default.yellow("\nWhat is the screen name you want to create?"));
             _this.rl.question("[DESTINATION] Screen name: ", function (answer) {
                 if (_this.isNullOrEmpty(answer)) {
-                    console.log("Please enter the screen name.");
+                    _this.logger.info("Please enter the screen name.");
                     _this.requestDestName(callback);
                     return;
                 }
                 var destName = ("" + answer).trim();
-                var destPath = path.join(_this.config.screenPath, destName);
-                if (_this.config.debug) {
-                    console.log(_this.className + "#requestDestName: destPath=" + destPath);
-                }
-                console.log("Absolute path: " + path.resolve(destPath));
+                var destPath = path.join(_this.options.screenPath, destName);
+                _this.logger.debug("%s - [debug] %s#requestDestName: destPath=%s", new Date().toISOString(), _this.className, chalk_1.default.gray(destPath));
                 if (fse.existsSync(destPath)) {
-                    console.log("The \"" + destName + "\" screen already exists, please check and try again.");
+                    _this.logger.error(chalk_1.default.red("The \"" + destName + "\" screen already exists, please check and try again."));
                     process.exit();
                 }
                 else {
@@ -88,10 +86,8 @@ var CopyScreenRecursively = (function () {
             });
         };
         this.copyFileRecursive = function (fromPath, toPath, callback) {
-            if (_this.config.debug) {
-                console.log(_this.className + "#copyFileRecursive: " +
-                    ("Start copying the screen from \"" + fromPath + "\" to \"" + toPath + "\"."));
-            }
+            _this.logger.debug("%s - [debug] %s#copyFileRecursive: Start copying the screen from %s to %s", new Date().toISOString(), _this.className, chalk_1.default.gray(fromPath), chalk_1.default.gray(toPath));
+            _this.logger.info("- [Folder] Start copying " + chalk_1.default.gray(fromPath) + " to " + chalk_1.default.gray(toPath));
             fse.ensureDirSync(toPath);
             var files = fse.readdirSync(fromPath);
             files.forEach(function (name) {
@@ -100,16 +96,12 @@ var CopyScreenRecursively = (function () {
                 var stats = fse.statSync(sourcePath);
                 if (stats.isDirectory()) {
                     var destPath = path.join(toPath, newName);
-                    if (_this.config.debug) {
-                        console.log(_this.className + "#copyFileRecursive: destPath=\"" + destPath + "\".");
-                    }
+                    _this.logger.debug('%s - [debug] %s#copyFileRecursive: destPath="%s"', new Date().toISOString(), _this.className, destPath);
                     _this.copyFileRecursive(sourcePath, destPath);
                 }
                 else {
                     var newFilePath = path.join(toPath, newName);
-                    if (_this.config.debug) {
-                        console.log(_this.className + "#copyFileRecursive: newFilePath=" + newFilePath);
-                    }
+                    _this.logger.debug("%s - [debug] %s#copyFileRecursive: newFilePath=%s", new Date().toISOString(), _this.className, newFilePath);
                     fse.ensureFileSync(newFilePath);
                     var sourceWords = _this.getReplaceWords(_this.currentSourceName);
                     var destWords = _this.getReplaceWords(_this.currentDestName);
@@ -119,7 +111,7 @@ var CopyScreenRecursively = (function () {
                         newFileData = _this.replaceAll(newFileData, sourceWords[key], destWords[key]);
                     }
                     fse.outputFileSync(newFilePath, newFileData, { encoding: "utf8" });
-                    console.log("The file \"" + sourcePath + "\" was copied successfully.");
+                    _this.logger.info("  + [File] " + chalk_1.default.gray(sourcePath) + " " + chalk_1.default.green("successfully") + " copied to " + chalk_1.default.gray(newFilePath));
                 }
             });
             if (typeof callback === "function") {
@@ -143,10 +135,9 @@ var CopyScreenRecursively = (function () {
             return value === undefined || value === null || value === "";
         };
         this.className = this.constructor.name;
-        this.config = props;
-        if (this.config.debug) {
-            console.log(this.className + "#constructor: props=" + JSON.stringify(props));
-        }
+        this.options = props;
+        this.logger = Logger_1.default(props);
+        this.logger.debug("%s - [debug] %s#constructor: props=%s", new Date().toISOString(), this.className, JSON.stringify(props));
         this.rl = readline.createInterface({
             input: process.stdin,
             output: process.stdout
